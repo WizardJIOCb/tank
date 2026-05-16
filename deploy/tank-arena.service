@@ -7,7 +7,7 @@ Type=simple
 WorkingDirectory=/var/www/tank.rodion.pro
 Environment=NODE_ENV=production
 Environment=HOST=127.0.0.1
-Environment=PORT=3000
+Environment=PORT=3017
 ExecStart=/usr/bin/node /var/www/tank.rodion.pro/server/index.js
 Restart=always
 RestartSec=5

@@ -18,7 +18,7 @@ sudo systemctl status tank-arena
 If the app directory is not `/var/www/tank.rodion.pro`, update
 `WorkingDirectory` and `ExecStart` in the service file. The `www-data` user must
 be able to read the project directory. The service binds Node to
-`127.0.0.1:3000`; nginx is the public entry point.
+`127.0.0.1:3017`; nginx is the public entry point.
 
 ## Nginx
 
