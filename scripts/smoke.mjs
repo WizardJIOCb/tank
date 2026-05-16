@@ -1,7 +1,10 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
+import { io } from "socket.io-client";
 
 const baseUrl = process.env.SMOKE_URL || "http://localhost:3000";
+
+await checkWebSocketTransport(baseUrl);
 
 let browser;
 try {
@@ -68,4 +71,31 @@ try {
   assert.deepEqual(errors, []);
 } finally {
   await browser.close();
+}
+
+function checkWebSocketTransport(url) {
+  return new Promise((resolve, reject) => {
+    const socket = io(url, {
+      transports: ["websocket"],
+      timeout: 5000,
+      reconnection: false
+    });
+
+    const timer = setTimeout(() => {
+      socket.close();
+      reject(new Error(`WebSocket connection timed out for ${url}`));
+    }, 7000);
+
+    socket.on("connect", () => {
+      clearTimeout(timer);
+      socket.close();
+      resolve();
+    });
+
+    socket.on("connect_error", (error) => {
+      clearTimeout(timer);
+      socket.close();
+      reject(error);
+    });
+  });
 }

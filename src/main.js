@@ -75,6 +75,7 @@ const canvas = document.querySelector("#arena");
 const connection = document.querySelector("#connection");
 const playerName = document.querySelector("#playerName");
 const createForm = document.querySelector("#createForm");
+const createButton = createForm.querySelector("button[type='submit']");
 const battleName = document.querySelector("#battleName");
 const maxPlayers = document.querySelector("#maxPlayers");
 const battleList = document.querySelector("#battleList");
@@ -85,6 +86,7 @@ const battleCode = document.querySelector("#battleCode");
 const roster = document.querySelector("#roster");
 
 playerName.value = state.session.name;
+syncConnectionControls();
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -136,12 +138,20 @@ requestAnimationFrame(render);
 
 socket.on("connect", () => {
   state.connected = true;
+  syncConnectionControls();
   hello();
 });
 
 socket.on("disconnect", () => {
   state.connected = false;
   connection.textContent = "Нет соединения";
+  syncConnectionControls();
+});
+
+socket.on("connect_error", () => {
+  state.connected = false;
+  connection.textContent = "Нет соединения с сервером";
+  syncConnectionControls();
 });
 
 socket.on("battles:update", (battles) => {
@@ -161,10 +171,26 @@ playerName.addEventListener("change", () => {
 
 createForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  socket.emit("battle:create", {
+
+  if (!state.connected) {
+    connection.textContent = "Нет соединения с сервером";
+    return;
+  }
+
+  createButton.disabled = true;
+  connection.textContent = "Создание боя...";
+  socket.timeout(5000).emit("battle:create", {
     name: battleName.value,
     maxPlayers: Number(maxPlayers.value)
-  }, handleJoinReply);
+  }, (error, reply) => {
+    createButton.disabled = !state.connected;
+    if (error) {
+      connection.textContent = "Сервер не ответил";
+      return;
+    }
+
+    handleJoinReply(reply);
+  });
 });
 
 refreshButton.addEventListener("click", requestBattles);
@@ -225,6 +251,10 @@ function handleJoinReply(reply) {
   state.selfSocketId = reply.selfSocketId;
   applyWorldState(reply.state);
   renderMatchPanel();
+}
+
+function syncConnectionControls() {
+  createButton.disabled = !state.connected;
 }
 
 function renderBattles() {

@@ -1,0 +1,19 @@
+[Unit]
+Description=Tank Arena
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/tank.rodion.pro
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=3000
+ExecStart=/usr/bin/node /var/www/tank.rodion.pro/server/index.js
+Restart=always
+RestartSec=5
+User=www-data
+Group=www-data
+SyslogIdentifier=tank-arena
+
+[Install]
+WantedBy=multi-user.target

@@ -146,6 +146,11 @@ input:focus {
   font-weight: 800;
 }
 
+.create button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .text-button,
 .icon-button {
   color: #d8efe4;

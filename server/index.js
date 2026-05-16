@@ -22,6 +22,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "..");
 const isProduction = process.env.NODE_ENV === "production";
 const port = Number(process.env.PORT) || 3000;
+const host = process.env.HOST || (isProduction ? "127.0.0.1" : "0.0.0.0");
 
 const app = express();
 const server = http.createServer(app);
@@ -126,8 +127,8 @@ setInterval(() => {
 
 setInterval(emitBattles, 3000);
 
-server.listen(port, () => {
-  console.log(`Tank Arena listening on http://localhost:${port}`);
+server.listen(port, host, () => {
+  console.log(`Tank Arena listening on http://${host}:${port}`);
 });
 
 function joinBattle(socket, battle, reply) {
