@@ -133,7 +133,8 @@ input:focus {
 .create button,
 .battle-card,
 .text-button,
-.icon-button {
+.icon-button,
+.menu-button {
   border: 0;
   border-radius: 6px;
   color: #092017;
@@ -152,7 +153,8 @@ input:focus {
 }
 
 .text-button,
-.icon-button {
+.icon-button,
+.menu-button {
   color: #d8efe4;
   background: rgb(255 255 255 / 9%);
 }
@@ -167,6 +169,39 @@ input:focus {
   width: 38px;
   height: 38px;
   font-size: 20px;
+}
+
+.menu-button {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 4;
+  display: none;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgb(255 255 255 / 13%);
+  font-weight: 800;
+  box-shadow: 0 12px 34px rgb(0 0 0 / 28%);
+  backdrop-filter: blur(14px);
+  pointer-events: auto;
+}
+
+.hud.in-battle .menu-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hud.in-battle:not(.menu-open) {
+  grid-template-columns: 1fr;
+}
+
+.hud.in-battle:not(.menu-open) .sidebar {
+  display: none;
+}
+
+.hud.in-battle .match-panel {
+  margin-top: 52px;
 }
 
 .battle-list {

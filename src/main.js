@@ -11,6 +11,7 @@ const state = {
   connected: false,
   battles: [],
   battle: null,
+  menuOpen: false,
   selfSocketId: null,
   world: null,
   players: new Map(),
@@ -23,7 +24,8 @@ const state = {
 app.innerHTML = `
   <canvas id="arena"></canvas>
   <main class="hud">
-    <section class="sidebar" data-testid="lobby-panel">
+    <button class="menu-button" id="menuButton" type="button" aria-controls="lobbyPanel" aria-expanded="false">Меню</button>
+    <section class="sidebar" id="lobbyPanel" data-testid="lobby-panel">
       <div class="brand">
         <div>
           <h1>Tank Arena</h1>
@@ -72,6 +74,8 @@ app.innerHTML = `
 `;
 
 const canvas = document.querySelector("#arena");
+const hud = document.querySelector(".hud");
+const menuButton = document.querySelector("#menuButton");
 const connection = document.querySelector("#connection");
 const playerName = document.querySelector("#playerName");
 const createForm = document.querySelector("#createForm");
@@ -87,6 +91,7 @@ const roster = document.querySelector("#roster");
 
 playerName.value = state.session.name;
 syncConnectionControls();
+syncHud();
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -194,19 +199,31 @@ createForm.addEventListener("submit", (event) => {
 });
 
 refreshButton.addEventListener("click", requestBattles);
+menuButton.addEventListener("click", () => {
+  state.menuOpen = !state.menuOpen;
+  syncHud();
+});
 leaveButton.addEventListener("click", () => {
   socket.emit("battle:leave", () => {
     state.battle = null;
+    state.menuOpen = false;
     state.selfSocketId = null;
     state.players.clear();
     state.bullets.clear();
     syncMeshes();
+    syncHud();
     renderMatchPanel();
     requestBattles();
   });
 });
 
 window.addEventListener("resize", resize);
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && state.battle && state.menuOpen) {
+    state.menuOpen = false;
+    syncHud();
+  }
+});
 window.addEventListener("keydown", (event) => updateKey(event, true));
 window.addEventListener("keyup", (event) => updateKey(event, false));
 window.addEventListener("pointermove", updateAim);
@@ -248,13 +265,23 @@ function handleJoinReply(reply) {
   }
 
   state.battle = reply.battle;
+  state.menuOpen = false;
   state.selfSocketId = reply.selfSocketId;
   applyWorldState(reply.state);
+  syncHud();
   renderMatchPanel();
 }
 
 function syncConnectionControls() {
   createButton.disabled = !state.connected;
+}
+
+function syncHud() {
+  const inBattle = Boolean(state.battle);
+  hud.classList.toggle("in-battle", inBattle);
+  hud.classList.toggle("menu-open", !inBattle || state.menuOpen);
+  menuButton.hidden = !inBattle;
+  menuButton.setAttribute("aria-expanded", String(inBattle && state.menuOpen));
 }
 
 function renderBattles() {
